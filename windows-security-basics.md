@@ -1,52 +1,50 @@
-Lab 1: Windows Services Fundamentals
-Objective
+# Lab 1: Windows Services – Understanding How They Work
 
-Understand how Windows services operate, how they are configured,
-and how service execution context affects system security.
+## Purpose
+This lab focuses on understanding how Windows services operate, why they exist,
+and how their configuration impacts system security.
 
-Tools Used
+## What Is a Windows Service?
+A Windows service is a background process that:
+- Runs without user interaction
+- Can start automatically or manually
+- Often performs critical system or network functions
 
-Windows Services Management Console (services.msc)
+## Key Questions When Analyzing a Service
+When reviewing any Windows service, always ask:
+1. What does this service do?
+2. When does it start?
+3. Which account does it run under?
+4. What privileges does that account have?
+5. Is this service necessary on this system?
 
-Windows built-in service configuration utilities
+## Tool Used
+- Windows Services Management Console (`services.msc`)
 
-Key Concepts
+## Example Analysis: DNS Client Service
 
-Background service execution in Windows
+**Service Name:** DNS Client  
+**Service Identifier:** `Dnscache`
 
-Service startup types (Automatic, Manual, Disabled)
+### What This Service Does
+The DNS Client service resolves domain names to IP addresses and caches results
+to improve network performance.
 
-Service execution context and privilege levels
+### Execution Context
+- Runs under: `NT AUTHORITY\NetworkService`
 
-Security implications of unnecessary or misconfigured services
+### Security Notes
+- Uses a limited-privilege account
+- Follows the principle of least privilege
+- Reduces system impact if compromised
 
-Principle of least privilege
+## Key Takeaways
+- Services often run with elevated privileges
+- Misconfigured services increase attack surface
+- Least privilege is a core security principle
 
-Service Analysis Example
+## Learning Outcome
+This lab improves understanding of Windows service behavior and security impact.
 
-Service Name: DNS Client
-Service Identifier: Dnscache
-
-Analysis Method
-
-The service configuration was examined using the Windows Services
-management console. The execution context was identified through the
-Log On tab in the service properties.
-
-Execution Context
-
-Runs under: NT AUTHORITY\NetworkService
-
-Security Observations
-
-Uses a restricted built-in account
-
-Limits system access compared to administrative accounts
-
-Helps reduce the impact of potential service compromise
-
-Learning Outcome
-
-This lab demonstrates how proper service configuration supports
-system security and stability, and why understanding service privileges
-is essential in Windows security administration.
+## Note
+This lab was performed in a controlled environment for educational purposes.
