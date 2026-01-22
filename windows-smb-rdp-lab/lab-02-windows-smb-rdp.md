@@ -1,16 +1,16 @@
-# 🔐 Lab 02 – Windows SMB & RDP
+# Lab 02 – Windows SMB & RDP
 **Cyber Fundamentals | Windows Basics**
 
 ---
 
-## 🎯 Lab Objective
+## Lab Objective
 The objective of this lab is to understand how **SMB (Server Message Block)** and **RDP (Remote Desktop Protocol)** are used in Windows environments for **remote access, authentication, and lateral movement**.
 
 This lab demonstrates how credentials discovered through SMB can be leveraged to gain further access using PsExec and RDP.
 
 ---
 
-## 🧠 Key Concepts Covered
+## Key Concepts Covered
 - SMB file sharing and authentication
 - Mapping and unmapping network shares
 - Credential switching limitations in Windows
@@ -20,7 +20,7 @@ This lab demonstrates how credentials discovered through SMB can be leveraged to
 
 ---
 
-## 🖥️ Lab Environment
+## Lab Environment
 
 | Machine | Role | Notes |
 |------|----|----|
@@ -62,13 +62,13 @@ net use * /delete
 ---
 ## Windows allows only one active SMB session per host.
 
-###3️. SMB Versions
+##3️. SMB Versions
 Version	Notes
 SMBv1	Insecure, guest access
 SMBv2	Improved security
 SMBv3	Encryption & strongest
 
-###4️. PsExec
+##4️. PsExec
 PsExec allows remote command execution over SMB.
 
 PsExec64.exe -i -accepteula \\<IP> -u admin -p <password> cmd
@@ -79,7 +79,7 @@ Used when:
 
 ---
 
-###5️. Credential Discovery
+##5️. Credential Discovery
 
 Credential files discovered via SMB enabled:
 
@@ -89,7 +89,7 @@ Credential files discovered via SMB enabled:
 
 ---
 
-###6️. Remote Desktop Protocol (RDP)
+##6️. Remote Desktop Protocol (RDP)
 
 - RDP provides full graphical access.
 - Requires valid credentials
@@ -98,7 +98,7 @@ Credential files discovered via SMB enabled:
 
 ---
 
-###7️. Network Level Authentication (NLA)
+##7️. Network Level Authentication (NLA)
 
 NLA:
 - Authenticates before session creation
