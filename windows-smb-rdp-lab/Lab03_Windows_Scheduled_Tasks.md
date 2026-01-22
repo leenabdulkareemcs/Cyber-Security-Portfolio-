@@ -1,188 +1,177 @@
-# Lab 03 – Windows Scheduled Tasks  
-**Cyber Fundamentals | Windows Basics**
+# Lab 03 – Windows Scheduled Tasks
+Cyber Fundamentals | Windows Basics
 
----
+-----------------------------------------------------------------------
 
-## Purpose
+PURPOSE
+This lab explains how Windows Scheduled Tasks work, why they are used,
+and how their configuration can affect system functionality and security.
+It also documents modifying an existing task using the command line.
 
-This lab focuses on understanding how Windows Scheduled Tasks work, why they are used, and how their configuration impacts system functionality and security.
+-----------------------------------------------------------------------
 
----
+WHAT ARE SCHEDULED TASKS?
+Scheduled Tasks are a Windows feature that allows programs or scripts
+to run automatically at specific times or when certain events occur.
 
-## What Are Scheduled Tasks?
+Common uses:
+- Launch scripts or programs
+- Automate routine tasks
+- Perform system maintenance
+- Run backups
+- Execute software updates
 
-Scheduled Tasks are a Windows system feature that allows users to run files at specific times or when certain events occur.
+Open Task Scheduler:
+Win + R
+taskschd.msc
 
-They are commonly used to:
-- Launch scripts or programs  
-- Automate routine tasks  
-- Perform system maintenance  
-- Run backups  
-- Execute software updates  
+-----------------------------------------------------------------------
 
-You can access the Task Scheduler by searching for it in the Windows Start menu.
+CORE COMPONENTS OF A TASK
+When creating or reviewing a task, always check:
 
----
+- Triggers       : When the task runs
+- Actions        : What the task runs
+- User Context   : Which account runs the task
+- Conditions     : Additional requirements (idle, power, network)
+- Settings       : Failure behavior, time limits, expiration
 
-## Task Creation Components
+-----------------------------------------------------------------------
 
-When creating a task, you need to specify:
-
-- **Triggers** – What causes the task to run  
-- **Actions** – What the task will do  
-- **User** – The user account under which the task runs  
-- **Conditions** – When the task is allowed to run  
-- **Settings** – How the task behaves under certain situations  
-
----
-
-## Triggers
-
+TRIGGERS
 Triggers define when a task should run.
 
 Examples:
-- Time-based (e.g., at 12:00)
-- Event-based (e.g., at system startup)
+- Time-based (daily, weekly, specific time)
+- Event-based (system startup, user logon)
 
-Triggers can also be customized so tasks can be:
-- Repeated  
-- Delayed  
-- Stopped based on a schedule  
+Triggers can be configured to:
+- Repeat at intervals
+- Delay execution
+- Stop after a set duration
 
----
+-----------------------------------------------------------------------
 
-## Actions
-
-Actions define what a task does.
-
-Examples:
-- Running a script  
-- Launching a program  
-- Starting a service  
-
----
-
-## Conditions
-
-Conditions specify when a task is allowed to run.
+ACTIONS
+Actions define what the task does.
 
 Examples:
-- Only when the computer is idle  
-- Only when on AC power  
-- Only when connected to a specific network  
+- Run a program
+- Run a PowerShell script
+- Start a service
 
----
+Example action:
+powershell.exe -f C:\Windows\task.ps1
 
-## Settings
+-----------------------------------------------------------------------
 
-Settings allow fine control over task behavior.
+CONDITIONS
+Conditions define when a task is allowed to run.
 
 Examples:
-- Restart the task if it fails  
-- Stop the task if it runs longer than a set time  
-- Delete the task after a certain number of days  
+- Only when the computer is idle
+- Only when on AC power
+- Only when connected to a specific network
 
----
+-----------------------------------------------------------------------
 
-## Creating a Task (GUI)
+SETTINGS
+Settings control how the task behaves.
 
-A Basic Task uses minimal configuration and a guided wizard.
+Examples:
+- Restart task if it fails
+- Stop task if it runs too long
+- Delete task after a set time
 
-Steps:
-1. Open **Task Scheduler**
-2. Right-click **Task Scheduler Library**
-3. Select **Create Basic Task**
+-----------------------------------------------------------------------
+
+GUI METHOD (TASK SCHEDULER)
+Steps to create a basic task:
+1. Open Task Scheduler
+2. Right-click Task Scheduler Library
+3. Select Create Basic Task
 4. Enter Name and Description
 5. Choose a Trigger
 6. Choose an Action
-7. Review and click Finish
+7. Review and finish
 
-Example action:
-```bash
-powershell.exe -f C:\Windows\task.ps1
-```
+Tasks can be edited later:
+Right-click task -> Properties
 
-You can edit tasks later by right-clicking and selecting **Properties**.
+-----------------------------------------------------------------------
 
----
+COMMAND LINE METHOD (SCHTASKS)
 
-## Creating Tasks Using schtasks
-
-You can also manage tasks via command line using **schtasks**.
-
-### Create a Task
-
-```bash
+Create a task:
 schtasks /create /tn "Task Name" /tr "Action" /sc "Trigger" /ru "Username"
-```
 
 Example:
-```bash
 schtasks /create /tn "My Task" /tr "powershell.exe -f C:\Windows\myscript.ps1" /sc DAILY /ru User
-```
 
----
-
-## Modifying Tasks
-
-Change a task:
-```bash
+Modify a task:
 schtasks /change /tn "Task Name" /tr "New Action"
-```
 
 Delete a task:
-```bash
 schtasks /delete /tn "Task Name"
-```
-
----
-
-## Listing Tasks
 
 List all tasks:
-```bash
 schtasks /query
-```
 
 View a specific task:
-```bash
 schtasks /query /tn "Task Name"
-```
 
----
+-----------------------------------------------------------------------
 
-## Parameters Explained
+PARAMETERS QUICK REFERENCE
+/tn   Task name
+/sc   Schedule or trigger type
+/tr   Action (command to run)
+/ru   Run-as user account
 
-- **tn** – Specifies the task name  
-- **sc** – Specifies the trigger condition  
-- **tr** – Specifies the action  
-- **ru** – Specifies the user account  
+-----------------------------------------------------------------------
 
----
+IN THIS LAB (PRACTICAL TASK)
+Objective:
+Modify the existing scheduled task named "ChangeMe" to run a new script.
 
-## In This Lab
+Required action:
+Run the PowerShell script:
+C:\Users\Public\changed.ps1
 
-You will:
-- Create scheduled tasks  
-- Modify existing tasks  
-- Delete tasks  
-- Use both GUI and schtasks  
-- Compare their usage and behavior  
+Command used:
+schtasks /change /tn "ChangeMe" /tr "powershell.exe -ExecutionPolicy Bypass -File C:\Users\Public\changed.ps1"
 
----
+Verification:
+schtasks /query /tn "ChangeMe" /v /fo list
 
-## Key Takeaways
+Confirm that "Task To Run" shows the updated command.
 
-- Scheduled Tasks automate system operations  
-- Misconfigured tasks can pose security risks  
-- Tasks can run with high privileges  
-- Both GUI and CLI tools are important to know  
+-----------------------------------------------------------------------
 
----
+SECURITY NOTES
+Scheduled Tasks can pose security risks if misconfigured because they can:
+- Run automatically without user interaction
+- Execute scripts or binaries silently
+- Run under high-privilege accounts
 
-## Revision Notes
+Always review:
+- The run-as account
+- The action path
+- Whether the task runs with highest privileges
+- Tasks executing from writable locations (e.g., C:\Users\Public)
 
-- Always check the user account running the task  
-- Monitor tasks that execute scripts or binaries  
-- Avoid unnecessary high-privilege tasks  
+-----------------------------------------------------------------------
+
+KEY TAKEAWAYS
+- Scheduled Tasks automate system operations
+- Misconfigured tasks can introduce security risks
+- High-privilege tasks require careful review
+- Both GUI and CLI management are important
+
+-----------------------------------------------------------------------
+
+REVISION NOTES
+- Always check the user account running the task
+- Monitor tasks that execute scripts or binaries
+- Avoid unnecessary high-privilege tasks
 - Regularly review scheduled tasks for security
