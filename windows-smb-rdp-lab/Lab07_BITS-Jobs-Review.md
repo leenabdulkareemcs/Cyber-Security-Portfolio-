@@ -90,14 +90,14 @@ In `man`:
 - press `q` to quit
 
 ## Commands to know (Ep.2)
-ls
-ls -la
-ls --help
-man ls
+- ls
+- ls -la
+- ls --help
+- man ls
 
-## What to do first in this lab (to complete tasks fast)
+## What to do first in this lab 
 pwd
-ls
-ls -la
-ls --help
-man ls
+- ls
+- ls -la
+- ls --help
+- man ls
