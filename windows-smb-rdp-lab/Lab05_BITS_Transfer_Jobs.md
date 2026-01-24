@@ -1,118 +1,307 @@
 ````md
-# Lab05 - Reviewing Windows BITS Transfer Jobs (PowerShell)
+# Lab05 — Windows BITS Jobs Review (PowerShell)
 
-## Lab Brief
-This lab uses Windows BITS (Background Intelligent Transfer Service) PowerShell cmdlets to review transfer jobs and extract important details that matter in security investigations, such as:
-- DisplayName (job name)
-- JobState (state of transfer)
-- FilesTotal / FilesTransferred (how many files)
-- Priority (transfer priority)
-- OwnerAccount (who created/owns the job)
-- RemoteName (target URL)
-- LocalName (where it saves locally)
+## Purpose
+This lab focuses on reviewing Windows Background Intelligent Transfer Service (BITS) jobs to identify pending transfers and extract key job details such as:
+- DisplayName
+- JobState
+- FilesTotal / FilesTransferred
+- OwnerAccount
+- Priority
+- Target URL (RemoteName) and Local path (LocalName)
 
-BITS is often used for legitimate background downloads, but it can also be abused to download payloads quietly, so knowing how to review jobs is important.
+BITS runs background downloads for Windows and applications. Reviewing BITS jobs is useful for troubleshooting and basic security monitoring.
 
 ---
 
-## What You Successfully Found (From Your Output)
+## Requirement (Permissions)
+To view jobs for **all users**, you must run PowerShell **as Administrator**.
+If you see: `Access is denied (0x80070005)`, it usually means you are not elevated.
 
-### Windows Security Manager
-- FilesTotal: 1
-- FilesTransferred: 0
-- JobState: Suspended
+How to run PowerShell as Administrator:
+- Start Menu -> PowerShell -> Right click -> Run as administrator
 
-Evidence (your output):
+---
+
+## Part 1 — Your Attempts (Commands + Outputs)
+
+### 1) List all BITS jobs for all users (failed)
+Command:
 ```powershell
-DisplayName      : Windows Security Manager
-JobState         : Suspended
-FilesTotal       : 1
-FilesTransferred : 0
+powershell -NoProfile -Command "Get-BitsTransfer -AllUsers | Select-Object DisplayName,JobId,OwnerAccount,JobState,CreationTime | Format-Table -Auto"
 ````
 
-Answer for the question:
+Output:
 
-* How many files are to be transferred (FilesTotal)? 1
-
----
-
-## Important Note (Why You Got Access Denied)
-
-If you run BITS queries without Administrator privileges, you will get:
-
-* 0x80070005 (E_ACCESSDENIED)
-
-Example errors you got:
-
-```powershell
+```text
 Get-BitsTransfer : Access is denied. (Exception from HRESULT: 0x80070005 (E_ACCESSDENIED))
-bitsadmin ... Unable to enum jobs - 0x80070005 Access is denied.
-net session -> System error 5 has occurred. Access is denied.
+At line:1 char:1
++ Get-BitsTransfer -AllUsers | Select-Object DisplayName,JobId,OwnerAcc ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : PermissionDenied: (:) [Get-BitsTransfer], UnauthorizedAccessException
+    + FullyQualifiedErrorId : GetBitsTransferAuthException,Microsoft.BackgroundIntelligentTransfer.Management.GetBitsTransfer
+
+Get-BitsTransfer : Access is denied. (Exception from HRESULT: 0x80070005 (E_ACCESSDENIED))
+At line:1 char:1
++ Get-BitsTransfer -AllUsers | Select-Object DisplayName,JobId,OwnerAcc ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [Get-BitsTransfer], UnauthorizedAccessException
+    + FullyQualifiedErrorId : System.UnauthorizedAccessException,Microsoft.BackgroundIntelligentTransfer.Management.GetBitsTransfer
 ```
 
-Fix:
+### 2) List only non-transferred jobs (failed)
 
-* Open PowerShell -> Run as Administrator
-* Then run `Get-BitsTransfer -AllUsers`
+Command:
+
+```powershell
+powershell -NoProfile -Command "Get-BitsTransfer -AllUsers | Where-Object { $_.JobState -ne 'Transferred' } | Select DisplayName,JobId,OwnerAccount,JobState | ft -Auto"
+```
+
+Output:
+
+```text
+Get-BitsTransfer : Access is denied. (Exception from HRESULT: 0x80070005 (E_ACCESSDENIED))
+At line:1 char:1
++ Get-BitsTransfer -AllUsers | Where-Object { .JobState -ne 'Transferre ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : PermissionDenied: (:) [Get-BitsTransfer], UnauthorizedAccessException
+    + FullyQualifiedErrorId : GetBitsTransferAuthException,Microsoft.BackgroundIntelligentTransfer.Management.GetBitsTransfer
+
+Get-BitsTransfer : Access is denied. (Exception from HRESULT: 0x80070005 (E_ACCESSDENIED))
+At line:1 char:1
++ Get-BitsTransfer -AllUsers | Where-Object { .JobState -ne 'Transferre ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [Get-BitsTransfer], UnauthorizedAccessException
+    + FullyQualifiedErrorId : System.UnauthorizedAccessException,Microsoft.BackgroundIntelligentTransfer.Management.GetBitsTransfer
+```
+
+### 3) Query job: "Windows Security Manager" with file counters (failed)
+
+Command:
+
+```powershell
+Get-BitsTransfer -AllUsers |
+Where-Object { $_.DisplayName -eq "Windows Security Manager" } |
+Select-Object DisplayName, JobId, OwnerAccount, JobState, FilesTotal, FilesTransferred |
+Format-List
+```
+
+Output:
+
+```text
+Get-BitsTransfer : Access is denied. (Exception from HRESULT: 0x80070005 (E_ACCESSDENIED))
+At line:1 char:1
++ Get-BitsTransfer -AllUsers |
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : PermissionDenied: (:) [Get-BitsTransfer], UnauthorizedAccessException
+    + FullyQualifiedErrorId : GetBitsTransferAuthException,Microsoft.BackgroundIntelligentTransfer.Management.GetBitsTransfer
+
+Get-BitsTransfer : Access is denied. (Exception from HRESULT: 0x80070005 (E_ACCESSDENIED))
+At line:1 char:1
++ Get-BitsTransfer -AllUsers |
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [Get-BitsTransfer], UnauthorizedAccessException
+    + FullyQualifiedErrorId : System.UnauthorizedAccessException,Microsoft.BackgroundIntelligentTransfer.Management.GetBitsTransfer
+```
+
+### 4) bitsadmin list all users verbose (failed)
+
+Command:
+
+```cmd
+C:\Users>bitsadmin /list /allusers /verbose
+```
+
+Output:
+
+```text
+BITSADMIN version 3.0
+BITS administration utility.
+(C) Copyright Microsoft Corp.
+
+Unable to enum jobs - 0x80070005
+Access is denied.
+```
+
+Command:
+
+```cmd
+C:\Users>bitsadmin /list /allusers /verbose | more
+```
+
+Output:
+
+```text
+BITSADMIN version 3.0
+BITS administration utility.
+(C) Copyright Microsoft Corp.
+
+Unable to enum jobs - 0x80070005
+Access is denied.
+```
+
+### 5) Create a task to run bitsadmin as SYSTEM (failed)
+
+Command:
+
+```cmd
+C:\Users>schtasks /create /tn TempBITS /sc once /st 00:00 /ru SYSTEM /tr "cmd /c bitsadmin /list /allusers /verbose > C:\Windows\Temp\bits.txt" /f
+```
+
+Output:
+
+```text
+WARNING: Task may not run because /ST is earlier than current time.
+ERROR: Access is denied.
+```
+
+Command:
+
+```cmd
+C:\Users>schtasks /run /tn TempBITS
+```
+
+Output:
+
+```text
+ERROR: The system cannot find the file specified.
+```
+
+Command:
+
+```cmd
+C:\Users>timeout /t 3 >nul
+```
+
+Output:
+
+```text
+```
+
+### 6) net session check (failed first)
+
+Command:
+
+```cmd
+C:\Users>net session
+```
+
+Output:
+
+```text
+System error 5 has occurred.
+
+Access is denied.
+```
 
 ---
 
-## Commands (Copy/Paste)
+## Part 2 — Running PowerShell Elevated (Successful)
 
-### 1) List all BITS jobs (all users)
+### 1) net session (success)
 
-```powershell
-Get-BitsTransfer -AllUsers |
-Select-Object DisplayName, JobId, OwnerAccount, JobState, Priority, FilesTotal, FilesTransferred |
-Format-Table -Auto
-```
-
-### 2) Show only pending/non-transferred jobs
+Command:
 
 ```powershell
-Get-BitsTransfer -AllUsers |
-Where-Object { $_.JobState -ne "Transferred" } |
-Select-Object DisplayName, JobId, OwnerAccount, JobState, Priority, FilesTotal, FilesTransferred |
-Format-Table -Auto
+PS C:\WINDOWS\system32> net session
 ```
 
-### 3) Get full details for the job: "Windows Security Manager"
+Output:
+
+```text
+There are no entries in the list.
+```
+
+### 2) Find the pending transfer: "Windows Security Manager" (success)
+
+Command:
 
 ```powershell
 Get-BitsTransfer -AllUsers |
 Where-Object { $_.DisplayName -eq "Windows Security Manager" -and $_.JobState -ne "Transferred" } |
-Select-Object DisplayName, JobState, FilesTotal, FilesTransferred, OwnerAccount, Priority |
+Select-Object DisplayName, JobState, FilesTotal, FilesTransferred |
 Format-List
 ```
 
-### 4) Get the target URL + local save path for "Windows Security Manager"
+Output:
 
-This answers: "What is the target URL?"
-
-```powershell
-$job = Get-BitsTransfer -AllUsers | Where-Object { $_.DisplayName -eq "Windows Security Manager" }
-$job | Get-BitsTransferFile | Select-Object RemoteName, LocalName | Format-List
+```text
+DisplayName      : Windows Security Manager
+JobState         : Suspended
+FilesTotal       : 1
+FilesTransferred : 0
 ```
 
-### 5) Windows Administration Tool: identify the downloaded file from the URL
+Lab Answer:
 
-This answers: "Based on the URL, what file is being downloaded?"
-
-```powershell
-$job = Get-BitsTransfer -AllUsers | Where-Object { $_.DisplayName -eq "Windows Administration Tool" }
-$job | Get-BitsTransferFile | Select-Object RemoteName, LocalName | Format-List
+```text
+FilesTotal = 1
 ```
 
-Extract only the filename from the RemoteName (URL):
+---
+
+## Part 3 — Commands to Answer the Remaining Lab Questions (Copy/Paste Ready)
+
+### Q1) How many files are to be transferred as part of the BITS job named "Windows Security Manager"?
+
+Command:
 
 ```powershell
-$remote = ($job | Get-BitsTransferFile | Select-Object -First 1 -ExpandProperty RemoteName)
+Get-BitsTransfer -AllUsers |
+Where-Object { $_.DisplayName -eq "Windows Security Manager" -and $_.JobState -ne "Transferred" } |
+Select-Object DisplayName, JobState, FilesTotal, FilesTransferred |
+Format-List
+```
+
+Expected field to read:
+
+```text
+FilesTotal
+```
+
+### Q2) What is the target URL of the BITS job named "Windows Security Manager"?
+
+Command:
+
+```powershell
+Get-BitsTransfer -AllUsers |
+Where-Object { $_.DisplayName -eq "Windows Security Manager" } |
+Get-BitsTransferFile |
+Select-Object RemoteName, LocalName |
+Format-List
+```
+
+Where to read:
+
+* `RemoteName` = target URL
+* `LocalName` = file path on disk
+
+### Q3) Based on the URL of the job named "Windows Administration Tool", what file is being downloaded?
+
+Command (show full URL + local path):
+
+```powershell
+Get-BitsTransfer -AllUsers |
+Where-Object { $_.DisplayName -eq "Windows Administration Tool" } |
+Get-BitsTransferFile |
+Select-Object RemoteName, LocalName |
+Format-List
+```
+
+Command (extract only the file name from URL):
+
+```powershell
+$remote = (Get-BitsTransfer -AllUsers |
+Where-Object { $_.DisplayName -eq "Windows Administration Tool" } |
+Get-BitsTransferFile |
+Select-Object -First 1 -ExpandProperty RemoteName)
+
 ($remote -split "/")[-1]
 ```
 
-### 6) Windows Update Information: priority
+### Q4) What priority has the job named "Windows Update Information" been assigned?
 
-This answers: "What priority has it been assigned?"
+Command:
 
 ```powershell
 Get-BitsTransfer -AllUsers |
@@ -121,9 +310,9 @@ Select-Object DisplayName, Priority |
 Format-List
 ```
 
-### 7) Windows Update Information: state
+### Q5) What is the state of the "Windows Update Information" BITS transfer job?
 
-This answers: "What is the state (JobState)?"
+Command:
 
 ```powershell
 Get-BitsTransfer -AllUsers |
@@ -132,52 +321,29 @@ Select-Object DisplayName, JobState |
 Format-List
 ```
 
-Or both together:
+### Q6) Who is the owner of the job named "PuTTY: a free SSH and Telnet client"?
 
-```powershell
-Get-BitsTransfer -AllUsers |
-Where-Object { $_.DisplayName -eq "Windows Update Information" } |
-Select-Object DisplayName, Priority, JobState |
-Format-List
-```
-
-### 8) PuTTY job: owner
-
-This answers: "Who is the owner?"
+Command:
 
 ```powershell
 Get-BitsTransfer -AllUsers |
 Where-Object { $_.DisplayName -eq "PuTTY: a free SSH and Telnet client" } |
-Select-Object DisplayName, OwnerAccount, JobState |
+Select-Object DisplayName, OwnerAccount |
 Format-List
 ```
 
 ---
 
-## Lab Results (Fill After You Run Commands)
+## Notes
 
-### Windows Security Manager
+* `Get-BitsTransfer -AllUsers` needs Administrator.
+* To inspect the actual URL/file being transferred, use `Get-BitsTransferFile`.
+* Common job states include: Suspended, Transferring, Queued, Transferred, Error.
+* In your confirmed output:
 
-* FilesTotal: 1
-* JobState: Suspended
-* Target URL (RemoteName): ________________________________
-* Local Path (LocalName): _________________________________
-* OwnerAccount: __________________________________________
-
-### Windows Administration Tool
-
-* Remote URL (RemoteName): ________________________________
-* Downloaded file name (from URL): ________________________
-
-### Windows Update Information
-
-* Priority: ______________________________________________
-* JobState: ______________________________________________
-
-### PuTTY: a free SSH and Telnet client
-
-* OwnerAccount: __________________________________________
-* JobState: ______________________________________________
+  * "Windows Security Manager" is `Suspended`
+  * It has `FilesTotal: 1`
+  * It has `FilesTransferred: 0`
 
 ```
 ::contentReference[oaicite:0]{index=0}
