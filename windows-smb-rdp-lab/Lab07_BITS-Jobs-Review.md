@@ -96,7 +96,7 @@ In `man`:
 - man ls
 
 ## What to do first in this lab 
-pwd
+- pwd
 - ls
 - ls -la
 - ls --help
