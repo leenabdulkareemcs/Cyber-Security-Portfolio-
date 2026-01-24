@@ -1,4 +1,3 @@
-````md
 # Lab06 — Windows Concepts: CertUtil (Practical Lab)
 
 ## Purpose
