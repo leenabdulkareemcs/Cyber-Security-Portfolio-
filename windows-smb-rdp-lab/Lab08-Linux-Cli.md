@@ -1,8 +1,4 @@
-أكيد. هذا سكربت/ملف GitHub جاهز (README.md) لــ **Lab 8** عن كل اللي أخذناه اليوم: **Changing Things + File Permissions + Editing Files + wc**.
-انسخيه كما هو وضعه في GitHub.
-
-````md
-# Lab 8 — Linux CLI Fundamentals
+# Lab 08 — Linux CLI Fundamentals
 
 This lab covers practical command-line tasks in Linux:
 1) Changing things (creating/moving/copying/deleting files and folders)
