@@ -95,15 +95,6 @@ Using the Cyber Kill Chain, organizations can:
 
 ---
 
-## **Lab Objective**
-
-In this lab, you will:
-
-* Match each **attack stage** to its correct description
-* Use the definitions above to complete a **drag-and-drop task**
-
----
-
 ## **Exam Tip**
 
 If the question mentions:
